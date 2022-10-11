@@ -6,7 +6,7 @@ class Config(object):
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'secret-key'
 
     BLOB_ACCOUNT = os.environ.get('BLOB_ACCOUNT') or 'dev1storageacct'
-    BLOB_STORAGE_KEY = os.environ.get('BLOB_STORAGE_KEY') or 'ENTER_BLOB_STORAGE_KEY'
+    BLOB_STORAGE_KEY = os.environ.get('BLOB_STORAGE_KEY') or 'XoM/EL0Q6a9Todm07uCBuWXegHlSLgUq5Mz1LKCSp8OZOKIiinlfTBHewD3cQbqL9W6XZQT7ON+5+ASt7qmpFQ=='
     BLOB_CONTAINER = os.environ.get('BLOB_CONTAINER') or 'images'
 
     SQL_SERVER = os.environ.get('SQL_SERVER') or 'dev1-sql-srv.database.windows.net'
