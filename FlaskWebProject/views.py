@@ -70,13 +70,14 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember_me.data)
-        app.logger.warning(f'Successful login by user: {user}')
+        
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
         return redirect(next_page)
     session["state"] = str(uuid.uuid4())
     auth_url = _build_auth_url(scopes=Config.SCOPE, state=session["state"])
+    app.logger.warning(f'Successful login by user: {user}')
     return render_template('login.html', title='Sign In', form=form, auth_url=auth_url)
 
 @app.route(Config.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
@@ -93,12 +94,13 @@ def authorized():
         if "error" in result:
             app.logger.error(f'Failed login attempt by {user}')
             return render_template("auth_error.html", result=result)
+        app.logger.warning(f'Successful login by user: {user}')
         session["user"] = result.get("id_token_claims")
         # Note: In a real app, we'd use the 'name' property from session["user"] below
         # Here, we'll use the admin username for anyone who is authenticated by MS
         user = User.query.filter_by(username="admin").first()
         login_user(user)
-        app.logger.warning(f'Successful login by user: {user}')
+        
         _save_cache(cache)
     return redirect(url_for('home'))
 
@@ -126,10 +128,11 @@ def _save_cache(cache):
     # TODO: Save the cache, if it has changed
     if cache.has_state_changed:
         session['token_cache'] = cache.serialize()
+    return cache
 
 def _build_msal_app(cache=None, authority=None):
     # TODO: Return a ConfidentialClientApplication
-    return ConfidentialClientApplication(Config.CLIENT_ID, authority=authority or Config.AUTHORITY, client_credential=Config.CLIENT_SECRET, token_cache=cache)
+    return msal.ConfidentialClientApplication(Config.CLIENT_ID, authority=authority or Config.AUTHORITY, client_credential=Config.CLIENT_SECRET, token_cache=cache)
 
 def _build_auth_url(authority=None, scopes=None, state=None):
     # TODO: Return the full Auth Request URL with appropriate Redirect URI
